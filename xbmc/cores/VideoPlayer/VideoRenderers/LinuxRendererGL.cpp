@@ -218,6 +218,7 @@ bool CLinuxRendererGL::Configure(const VideoPicture &picture, float fps, unsigne
   m_srcPrimaries = GetSrcPrimaries(static_cast<AVColorPrimaries>(picture.color_primaries),
                                    picture.iWidth, picture.iHeight);
   m_toneMap = false;
+  m_convertPrimaries = true;
 
   // Calculate the input frame aspect ratio.
   CalculateFrameAspectRatio(picture.iDisplayWidth, picture.iDisplayHeight);
@@ -901,6 +902,7 @@ void CLinuxRendererGL::LoadShaders(int field)
     EShaderFormat shaderFormat = GetShaderFormat();
     std::shared_ptr<GLSLOutput> out;
     m_toneMapMethod = m_videoSettings.m_ToneMapMethod;
+    m_convertPrimaries = m_videoSettings.m_ConvertPrimaries;
     if (m_renderQuality == RQ_SINGLEPASS)
     {
       out = std::make_shared<GLSLOutput>(GLSLOutput(4, m_useDithering, m_ditherDepth,
@@ -912,7 +914,8 @@ void CLinuxRendererGL::LoadShaders(int field)
       {
         m_pYUVShader = new YUV2RGBFilterShader4(m_textureTarget == GL_TEXTURE_RECTANGLE,
                                                 shaderFormat, m_nonLinStretch,
-                                                AVColorPrimaries::AVCOL_PRI_BT709, m_srcPrimaries,
+                                                m_convertPrimaries ? AVColorPrimaries::AVCOL_PRI_BT709 : m_srcPrimaries,
+                                                m_srcPrimaries,
                                                 m_toneMap,
                                                 m_toneMapMethod,
                                                 m_scalingMethod, out);
@@ -939,7 +942,8 @@ void CLinuxRendererGL::LoadShaders(int field)
     {
       m_pYUVShader = new YUV2RGBProgressiveShader(m_textureTarget == GL_TEXTURE_RECTANGLE, shaderFormat,
                                                   m_nonLinStretch && m_renderQuality == RQ_SINGLEPASS,
-                                                  AVColorPrimaries::AVCOL_PRI_BT709, m_srcPrimaries, m_toneMap, m_toneMapMethod, out);
+                                                  m_convertPrimaries ? AVColorPrimaries::AVCOL_PRI_BT709 : m_srcPrimaries,
+                                                  m_srcPrimaries, m_toneMap, m_toneMapMethod, out);
 
       if (!m_cmsOn)
         m_pYUVShader->SetConvertFullColorRange(m_fullRange);
@@ -2719,9 +2723,15 @@ void CLinuxRendererGL::CheckVideoParameters(int index)
 {
   CPictureBuffer &buf = m_buffers[index];
   ETONEMAPMETHOD method = m_videoSettings.m_ToneMapMethod;
+  bool convertPrimaries = m_videoSettings.m_ConvertPrimaries;
+  if (m_convertPrimaries != convertPrimaries)
+  {
+    m_convertPrimaries = convertPrimaries;
+    m_reloadShaders = true;
+  }
 
   AVColorPrimaries srcPrim = GetSrcPrimaries(buf.m_srcPrimaries, buf.image.width, buf.image.height);
-  if (srcPrim != m_srcPrimaries)
+  if (m_convertPrimaries && srcPrim != m_srcPrimaries)
   {
     m_srcPrimaries = srcPrim;
     m_reloadShaders = true;

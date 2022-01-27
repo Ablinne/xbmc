@@ -41,6 +41,7 @@ CVideoSettings::CVideoSettings()
   m_ToneMapParam = 1.0f;
   m_Orientation = 0;
   m_CenterMixLevel = 0;
+  m_ConvertPrimaries = true;
 }
 
 bool CVideoSettings::operator!=(const CVideoSettings &right) const
@@ -72,6 +73,8 @@ bool CVideoSettings::operator!=(const CVideoSettings &right) const
   if (m_ToneMapParam != right.m_ToneMapParam) return true;
   if (m_Orientation != right.m_Orientation) return true;
   if (m_CenterMixLevel != right.m_CenterMixLevel) return true;
+  if (m_ConvertPrimaries != right.m_ConvertPrimaries)
+    return true;
   return false;
 }
 
