@@ -93,7 +93,7 @@ void CVideoDatabase::CreateTables()
               "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream integer, SubtitleStream integer,"
               "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
               "VolumeAmplification float, AudioDelay float, ResumeTime integer,"
-              "Sharpness float, NoiseReduction float, NonLinStretch bool, PostProcess bool,"
+              "Sharpness float, NoiseReduction float, NonLinStretch bool, ConvPrim bool, PostProcess bool,"
               "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool, VideoStream integer,"
               "TonemapMethod integer, TonemapParam float, Orientation integer, CenterMixLevel integer)\n");
 
@@ -4435,6 +4435,7 @@ bool CVideoDatabase::GetVideoSettings(int idFile, CVideoSettings &settings)
       settings.m_Contrast = m_pDS->fv("Contrast").get_asFloat();
       settings.m_CustomPixelRatio = m_pDS->fv("PixelRatio").get_asFloat();
       settings.m_CustomNonLinStretch = m_pDS->fv("NonLinStretch").get_asBool();
+      settings.m_ConvertPrimaries = m_pDS->fv("ConvPrim").get_asBool();
       settings.m_NoiseReduction = m_pDS->fv("NoiseReduction").get_asFloat();
       settings.m_PostProcess = m_pDS->fv("PostProcess").get_asBool();
       settings.m_Sharpness = m_pDS->fv("Sharpness").get_asFloat();
@@ -4498,7 +4499,7 @@ void CVideoDatabase::SetVideoSettings(int idFile, const CVideoSettings &setting)
           "AudioStream=%i,SubtitleStream=%i,SubtitleDelay=%f,SubtitlesOn=%i,Brightness=%f,Contrast="
           "%f,Gamma=%f,"
           "VolumeAmplification=%f,AudioDelay=%f,Sharpness=%f,NoiseReduction=%f,NonLinStretch=%i,"
-          "PostProcess=%i,ScalingMethod=%i,",
+          "ConvPrim=%i,PostProcess=%i,ScalingMethod=%i,",
           setting.m_InterlaceMethod, setting.m_ViewMode,
           static_cast<double>(setting.m_CustomZoomAmount),
           static_cast<double>(setting.m_CustomPixelRatio),
@@ -4509,7 +4510,7 @@ void CVideoDatabase::SetVideoSettings(int idFile, const CVideoSettings &setting)
           static_cast<double>(setting.m_VolumeAmplification),
           static_cast<double>(setting.m_AudioDelay), static_cast<double>(setting.m_Sharpness),
           static_cast<double>(setting.m_NoiseReduction), setting.m_CustomNonLinStretch,
-          setting.m_PostProcess, setting.m_ScalingMethod);
+          setting.m_ConvertPrimaries, setting.m_PostProcess, setting.m_ScalingMethod);
       std::string strSQL2;
 
       strSQL2 = PrepareSQL("ResumeTime=%i,StereoMode=%i,StereoInvert=%i,VideoStream=%i,"
@@ -4528,10 +4529,10 @@ void CVideoDatabase::SetVideoSettings(int idFile, const CVideoSettings &setting)
                 "AudioStream,SubtitleStream,SubtitleDelay,SubtitlesOn,Brightness,"
                 "Contrast,Gamma,VolumeAmplification,AudioDelay,"
                 "ResumeTime,"
-                "Sharpness,NoiseReduction,NonLinStretch,PostProcess,ScalingMethod,StereoMode,StereoInvert,VideoStream,TonemapMethod,TonemapParam,Orientation,CenterMixLevel) "
+                "Sharpness,NoiseReduction,NonLinStretch,ConvPrim,PostProcess,ScalingMethod,StereoMode,StereoInvert,VideoStream,TonemapMethod,TonemapParam,Orientation,CenterMixLevel) "
               "VALUES ";
       strSQL += PrepareSQL(
-          "(%i,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%f,%f,%f,%f,%i,%f,%f,%i,%i,%i,%i,%i,%i,%i,%f,%i,%i)",
+          "(%i,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%f,%f,%f,%f,%i,%f,%f,%i,%i,%i,%i,%i,%i,%i,%i,%f,%i,%i)",
           idFile, setting.m_InterlaceMethod, setting.m_ViewMode,
           static_cast<double>(setting.m_CustomZoomAmount),
           static_cast<double>(setting.m_CustomPixelRatio),
@@ -4542,7 +4543,7 @@ void CVideoDatabase::SetVideoSettings(int idFile, const CVideoSettings &setting)
           static_cast<double>(setting.m_VolumeAmplification),
           static_cast<double>(setting.m_AudioDelay), setting.m_ResumeTime,
           static_cast<double>(setting.m_Sharpness), static_cast<double>(setting.m_NoiseReduction),
-          setting.m_CustomNonLinStretch, setting.m_PostProcess, setting.m_ScalingMethod,
+          setting.m_CustomNonLinStretch, setting.m_ConvertPrimaries, setting.m_PostProcess, setting.m_ScalingMethod,
           setting.m_StereoMode, setting.m_StereoInvert, setting.m_VideoStream,
           setting.m_ToneMapMethod, static_cast<double>(setting.m_ToneMapParam),
           setting.m_Orientation, setting.m_CenterMixLevel);
@@ -5839,11 +5840,15 @@ void CVideoDatabase::UpdateTables(int iVersion)
   {
     m_pDS->exec("ALTER TABLE streamdetails ADD strHdrType text");
   }
+  if (iVersion < 121)
+  {
+    m_pDS->exec("ALTER TABLE settings ADD ConvPrim bool");
+  }
 }
 
 int CVideoDatabase::GetSchemaVersion() const
 {
-  return 120;
+  return 121;
 }
 
 bool CVideoDatabase::LookupByFolders(const std::string &path, bool shows)
