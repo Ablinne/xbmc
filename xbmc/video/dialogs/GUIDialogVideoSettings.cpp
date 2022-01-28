@@ -39,6 +39,7 @@
 #define SETTING_VIDEO_CONTRAST            "video.contrast"
 #define SETTING_VIDEO_GAMMA               "video.gamma"
 #define SETTING_VIDEO_NONLIN_STRETCH      "video.nonlinearstretch"
+#define SETTING_VIDEO_CONVERT_PRIMARIES "video.convertprimaries"
 #define SETTING_VIDEO_POSTPROCESS         "video.postprocess"
 #define SETTING_VIDEO_VERTICAL_SHIFT      "video.verticalshift"
 #define SETTING_VIDEO_TONEMAP_METHOD      "video.tonemapmethod"
@@ -134,6 +135,12 @@ void CGUIDialogVideoSettings::OnSettingChanged(const std::shared_ptr<const CSett
       g_application.GetAppPlayer().SetRenderViewMode(vs.m_ViewMode, vs.m_CustomZoomAmount,
                                                  vs.m_CustomPixelRatio, vs.m_CustomVerticalShift,
                                                  vs.m_CustomNonLinStretch);
+  }
+  else if (settingId == SETTING_VIDEO_CONVERT_PRIMARIES)
+  {
+    CVideoSettings vs = g_application.GetAppPlayer().GetVideoSettings();
+    vs.m_ConvertPrimaries = std::static_pointer_cast<const CSettingBool>(setting)->GetValue();
+    g_application.GetAppPlayer().SetVideoSettings(vs);
   }
   else if (settingId == SETTING_VIDEO_POSTPROCESS)
   {
@@ -429,6 +436,9 @@ void CGUIDialogVideoSettings::InitializeSettings()
               videoSettings.m_Sharpness, "{:2.2f}", -1.0f, 0.02f, 1.0f, 16313, usePopup);
   if (g_application.GetAppPlayer().Supports(RENDERFEATURE_NONLINSTRETCH))
     AddToggle(groupVideo, SETTING_VIDEO_NONLIN_STRETCH, 659, SettingLevel::Basic, videoSettings.m_CustomNonLinStretch);
+
+  AddToggle(groupVideo, SETTING_VIDEO_CONVERT_PRIMARIES, 16040, SettingLevel::Basic,
+            videoSettings.m_ConvertPrimaries);
 
   // tone mapping
   if (g_application.GetAppPlayer().Supports(RENDERFEATURE_TONEMAP))
