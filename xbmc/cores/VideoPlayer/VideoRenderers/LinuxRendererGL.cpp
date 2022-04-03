@@ -912,13 +912,10 @@ void CLinuxRendererGL::LoadShaders(int field)
 
       if (m_scalingMethod == VS_SCALINGMETHOD_LANCZOS3_FAST || m_scalingMethod == VS_SCALINGMETHOD_SPLINE36_FAST)
       {
-        m_pYUVShader = new YUV2RGBFilterShader4(m_textureTarget == GL_TEXTURE_RECTANGLE,
-                                                shaderFormat, m_nonLinStretch,
-                                                m_convertPrimaries ? AVColorPrimaries::AVCOL_PRI_BT709 : m_srcPrimaries,
-                                                m_srcPrimaries,
-                                                m_toneMap,
-                                                m_toneMapMethod,
-                                                m_scalingMethod, out);
+        m_pYUVShader = new YUV2RGBFilterShader4(
+            m_textureTarget == GL_TEXTURE_RECTANGLE, shaderFormat, m_nonLinStretch,
+            m_convertPrimaries ? AVColorPrimaries::AVCOL_PRI_BT709 : m_srcPrimaries, m_srcPrimaries,
+            m_toneMap, m_toneMapMethod, m_scalingMethod, out);
         if (!m_cmsOn)
           m_pYUVShader->SetConvertFullColorRange(m_fullRange);
 
@@ -940,10 +937,11 @@ void CLinuxRendererGL::LoadShaders(int field)
 
     if (!m_pYUVShader)
     {
-      m_pYUVShader = new YUV2RGBProgressiveShader(m_textureTarget == GL_TEXTURE_RECTANGLE, shaderFormat,
-                                                  m_nonLinStretch && m_renderQuality == RQ_SINGLEPASS,
-                                                  m_convertPrimaries ? AVColorPrimaries::AVCOL_PRI_BT709 : m_srcPrimaries,
-                                                  m_srcPrimaries, m_toneMap, m_toneMapMethod, out);
+      m_pYUVShader = new YUV2RGBProgressiveShader(
+          m_textureTarget == GL_TEXTURE_RECTANGLE, shaderFormat,
+          m_nonLinStretch && m_renderQuality == RQ_SINGLEPASS,
+          m_convertPrimaries ? AVColorPrimaries::AVCOL_PRI_BT709 : m_srcPrimaries, m_srcPrimaries,
+          m_toneMap, m_toneMapMethod, out);
 
       if (!m_cmsOn)
         m_pYUVShader->SetConvertFullColorRange(m_fullRange);

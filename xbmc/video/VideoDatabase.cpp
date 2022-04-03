@@ -89,13 +89,16 @@ void CVideoDatabase::CreateTables()
   m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, player text, playerState text, type integer)\n");
 
   CLog::Log(LOGINFO, "create settings table");
-  m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
-              "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream integer, SubtitleStream integer,"
-              "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
-              "VolumeAmplification float, AudioDelay float, ResumeTime integer,"
-              "Sharpness float, NoiseReduction float, NonLinStretch bool, ConvPrim bool, PostProcess bool,"
-              "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool, VideoStream integer,"
-              "TonemapMethod integer, TonemapParam float, Orientation integer, CenterMixLevel integer)\n");
+  m_pDS->exec(
+      "CREATE TABLE settings ( idFile integer, Deinterlace bool,"
+      "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream "
+      "integer, SubtitleStream integer,"
+      "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
+      "VolumeAmplification float, AudioDelay float, ResumeTime integer,"
+      "Sharpness float, NoiseReduction float, NonLinStretch bool, ConvPrim bool, PostProcess bool,"
+      "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool, "
+      "VideoStream integer,"
+      "TonemapMethod integer, TonemapParam float, Orientation integer, CenterMixLevel integer)\n");
 
   CLog::Log(LOGINFO, "create stacktimes table");
   m_pDS->exec("CREATE TABLE stacktimes (idFile integer, times text)\n");
@@ -4525,28 +4528,32 @@ void CVideoDatabase::SetVideoSettings(int idFile, const CVideoSettings &setting)
     else
     { // add the items
       m_pDS->close();
-      strSQL= "INSERT INTO settings (idFile,Deinterlace,ViewMode,ZoomAmount,PixelRatio, VerticalShift, "
-                "AudioStream,SubtitleStream,SubtitleDelay,SubtitlesOn,Brightness,"
-                "Contrast,Gamma,VolumeAmplification,AudioDelay,"
-                "ResumeTime,"
-                "Sharpness,NoiseReduction,NonLinStretch,ConvPrim,PostProcess,ScalingMethod,StereoMode,StereoInvert,VideoStream,TonemapMethod,TonemapParam,Orientation,CenterMixLevel) "
-              "VALUES ";
-      strSQL += PrepareSQL(
-          "(%i,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%f,%f,%f,%f,%i,%f,%f,%i,%i,%i,%i,%i,%i,%i,%i,%f,%i,%i)",
-          idFile, setting.m_InterlaceMethod, setting.m_ViewMode,
-          static_cast<double>(setting.m_CustomZoomAmount),
-          static_cast<double>(setting.m_CustomPixelRatio),
-          static_cast<double>(setting.m_CustomVerticalShift), setting.m_AudioStream,
-          setting.m_SubtitleStream, static_cast<double>(setting.m_SubtitleDelay),
-          setting.m_SubtitleOn, static_cast<double>(setting.m_Brightness),
-          static_cast<double>(setting.m_Contrast), static_cast<double>(setting.m_Gamma),
-          static_cast<double>(setting.m_VolumeAmplification),
-          static_cast<double>(setting.m_AudioDelay), setting.m_ResumeTime,
-          static_cast<double>(setting.m_Sharpness), static_cast<double>(setting.m_NoiseReduction),
-          setting.m_CustomNonLinStretch, setting.m_ConvertPrimaries, setting.m_PostProcess, setting.m_ScalingMethod,
-          setting.m_StereoMode, setting.m_StereoInvert, setting.m_VideoStream,
-          setting.m_ToneMapMethod, static_cast<double>(setting.m_ToneMapParam),
-          setting.m_Orientation, setting.m_CenterMixLevel);
+      strSQL =
+          "INSERT INTO settings (idFile,Deinterlace,ViewMode,ZoomAmount,PixelRatio, VerticalShift, "
+          "AudioStream,SubtitleStream,SubtitleDelay,SubtitlesOn,Brightness,"
+          "Contrast,Gamma,VolumeAmplification,AudioDelay,"
+          "ResumeTime,"
+          "Sharpness,NoiseReduction,NonLinStretch,ConvPrim,PostProcess,ScalingMethod,StereoMode,"
+          "StereoInvert,VideoStream,TonemapMethod,TonemapParam,Orientation,CenterMixLevel) "
+          "VALUES ";
+      strSQL +=
+          PrepareSQL("(%i,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%f,%f,%f,%f,%i,%f,%f,%i,%i,%i,%i,%i,%i,%i,%"
+                     "i,%f,%i,%i)",
+                     idFile, setting.m_InterlaceMethod, setting.m_ViewMode,
+                     static_cast<double>(setting.m_CustomZoomAmount),
+                     static_cast<double>(setting.m_CustomPixelRatio),
+                     static_cast<double>(setting.m_CustomVerticalShift), setting.m_AudioStream,
+                     setting.m_SubtitleStream, static_cast<double>(setting.m_SubtitleDelay),
+                     setting.m_SubtitleOn, static_cast<double>(setting.m_Brightness),
+                     static_cast<double>(setting.m_Contrast), static_cast<double>(setting.m_Gamma),
+                     static_cast<double>(setting.m_VolumeAmplification),
+                     static_cast<double>(setting.m_AudioDelay), setting.m_ResumeTime,
+                     static_cast<double>(setting.m_Sharpness),
+                     static_cast<double>(setting.m_NoiseReduction), setting.m_CustomNonLinStretch,
+                     setting.m_ConvertPrimaries, setting.m_PostProcess, setting.m_ScalingMethod,
+                     setting.m_StereoMode, setting.m_StereoInvert, setting.m_VideoStream,
+                     setting.m_ToneMapMethod, static_cast<double>(setting.m_ToneMapParam),
+                     setting.m_Orientation, setting.m_CenterMixLevel);
       m_pDS->exec(strSQL);
     }
   }
