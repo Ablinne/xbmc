@@ -219,6 +219,7 @@ protected:
   unsigned int m_ditherDepth;
   bool m_fullRange;
   AVColorPrimaries m_srcPrimaries;
+  bool m_ptbt2020 = false;
   bool m_toneMap = false;
   int m_toneMapMethod = 0;
   float m_clearColour = 0.0f;
